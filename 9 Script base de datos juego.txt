@@ -1,0 +1,549 @@
+-- Universidad de la Sierra Sur.
+-- Licenciatura en informatica.
+-- Materia: Base de datos II.
+-- Autor: Belisario Nazario Anselmo
+-- Fecha:30/10/2018
+-- Descripcion:Trabajo parcial uno quinto semestre.
+-- Nombre: Script base de datos juego.
+
+-- Eliminando residuaos de base de datos juego.
+DROP DATABASE IF EXISTS juego;
+
+-- Creando la base de datos juego.
+CREATE DATABASE juego;
+-- Usando la base de datos juego.
+USE juego;
+
+-- Creando la tabla de jugadores.
+CREATE TABLE jugadores(
+    idJugador INT NOT NULL AUTO_INCREMENT,
+    nombreJugador VARCHAR(45) NOT NULL,
+    nivel INT NULL,
+    fecha DATE NOT NULL,
+    años int,
+    CONSTRAINT jugadores_pk PRIMARY KEY(idJugador)
+);
+
+-- Creando la tabla campeones.
+CREATE TABLE campeones(
+    idCampeon INT NOT NULL AUTO_INCREMENT,
+    nombreCampeon VARCHAR(45) NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
+    precio DECIMAL(8,2) NULL,
+    fecha DATE NOT NULL,
+    años INT,
+    CONSTRAINT campeones_clave_alt UNIQUE (nombreCampeon),
+    CONSTRAINT campeones_pk PRIMARY KEY(idCampeon)
+);
+
+-- Creando la tabla batallas.
+CREATE TABLE batallas(
+    jugadorId INT NOT NULL,
+    campeonId INT NOT NULL,
+    cantidad INT NOT NULL,
+    CONSTRAINT batallas_jugadores FOREIGN KEY (jugadorId)
+        REFERENCES jugadores (idJugador)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT batallas_campeones FOREIGN KEY (campeonId)
+        REFERENCES campeones (idCampeon)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE, 
+        CONSTRAINT batallas_pk PRIMARY KEY  (jugadorId, campeonId)
+);
+
+
+-- 1.- sp permite insertar un jugador.
+DELIMITER //
+CREATE PROCEDURE `spCrearRegistroJugador` (
+	IN _nombreJugador VARCHAR (45),
+    IN _nivel INT,
+    IN _fecha DATE,
+    IN _años INT
+)
+BEGIN
+	INSERT INTO jugadores (
+		nombreJugador, 
+        nivel, 
+        fecha,
+        años
+	)
+	VALUES(
+		_nombreJugador,
+        _nivel,
+        _fecha,
+        _años
+    );
+END //
+DELIMITER ;
+
+
+-- 2.- sp permite insertar un campeon.
+DELIMITER //
+CREATE PROCEDURE `spCrearRegistroCampeon` (
+	IN _nombreCampeon VARCHAR (45),
+    IN _tipo VARCHAR(20),
+    IN _precio DECIMAL(8,2),
+    IN _fecha DATE,
+    IN _años INT
+)
+BEGIN
+	INSERT INTO campeones (
+		nombreCampeon, 
+        tipo, 
+        precio,
+        fecha,
+        años
+	)
+	VALUES(
+		_nombreCampeon,
+        _tipo,
+        _precio,
+        _fecha,
+        _años
+    );
+END //
+DELIMITER ;
+
+-- 3.- sp permite registrar una batalla.
+DELIMITER //
+CREATE PROCEDURE `spCrearRegistroBatallas` (
+	IN _jugadorId INT,
+    IN _campeonId INT,
+    IN _cantidad INT
+)
+BEGIN
+	INSERT INTO batallas (
+		jugadorId, 
+        campeonId, 
+        cantidad
+	)
+	VALUES(
+		_jugadorId,
+        _campeonId,
+        _cantidad
+    );
+END //
+DELIMITER ;
+
+-- 4.- sp permite actualizar un jugador.
+DELIMITER //
+CREATE PROCEDURE `spActualizaJugador`(
+	IN _nombreJugador VARCHAR(45),
+	In _nivel INT,
+    in _fecha DATE,
+    in _años int,
+	IN _idJugador INT
+)
+begin
+	UPDATE jugadores 
+    set nombreJugador = _nombreJugador, nivel = _nivel, fecha = _fecha, años=_años WHERE idJugador = _idJugador;
+end //
+DELIMITER ;
+
+-- 5.- sp permite actualizar una batalla.
+DELIMITER //
+CREATE PROCEDURE `spActualizaBatalla`(
+    in _jugadorId INT ,
+    IN _campeonId INT ,
+    IN _cantidad INT
+)
+begin
+	UPDATE batallas
+    set jugadorId = _jugadorId, campeonId = _campeonId,cantidad=_cantidad where jugadorid=_jugadorid and campeonid=_campeonid;
+end //
+DELIMITER ;
+
+-- 6.- sp permite actualizar un campeon.
+DELIMITER //
+CREATE PROCEDURE `spActualizaCampeon`(
+  in _nombreCampeon VARCHAR(45),
+  in  _tipo VARCHAR(20),
+  in  _precio DECIMAL(8,2),
+  in  _fecha DATE,
+  in  _años INT,
+  in  _idCampeon INT
+)
+begin
+	UPDATE campeones
+    set nombreCampeon = _nombreCampeon, tipo = _tipo, precio = _precio,fecha=_fecha, años=_años WHERE idCampeon = _idCampeon;
+end //
+DELIMITER ;
+
+-- 7.- sp permite eliminar un jugador.
+DELIMITER //
+CREATE PROCEDURE `spEliminaRegistroJugador` (
+	IN _jugadorId INT
+)
+BEGIN
+	 DELETE FROM jugadores
+	 WHERE idJugador=_jugadorId;
+END //
+DELIMITER ;
+
+-- 8.- sp permite eliminar un campeon.
+DELIMITER //
+CREATE PROCEDURE `spEliminaRegistroCampeon` (
+	IN _idCampeon INT
+)
+BEGIN
+	 DELETE FROM campeones
+	 WHERE idCampeon=_idcampeon;
+END //
+DELIMITER ;
+
+-- 9.- sp permite eliminar un registro de batalla.
+DELIMITER //
+CREATE PROCEDURE `spEliminaRegistroBatalla` (
+	IN _jugadorId INT,
+    IN _campeonId INT
+)
+BEGIN
+	 DELETE FROM batallas 
+	 WHERE campeonId= _campeonId
+     AND jugadorId= _jugadorId;
+END //
+DELIMITER ;
+
+-- 10.- sp muestra todos los jugadores.
+DELIMITER //
+CREATE PROCEDURE `spRegistrosJugadores`()
+BEGIN
+	SELECT * fROM jugadores;
+END //
+DELIMITER ; 
+
+-- 11.-sp muestra todos los campeones.
+DELIMITER //
+CREATE PROCEDURE `spRegistrosCampeones`()
+BEGIN
+	SELECT * fROM campeones;
+END //
+DELIMITER ;
+
+-- 12.- sp muestra todos los registros de las batallas.
+DELIMITER //
+CREATE PROCEDURE `spRegistrosBatallas`()
+BEGIN
+	SELECT * fROM batallas;
+END //
+DELIMITER ;
+
+
+--13 sp muestra un jugador especifico.
+DELIMITER //
+CREATE PROCEDURE `spjugadorEspecifico`(
+	in _idJugador int
+)
+begin 
+	select * from jugadores where idJugador=_idJugador;
+end //
+DELIMITER ;
+
+
+-- 14.- sp muestra un campeon especifico.
+DELIMITER //
+CREATE PROCEDURE `spCampeonEspecifico`(
+	in _idCampeon int
+)
+begin 
+	select * from campeones where idCampeon=_idCampeon;
+end //
+DELIMITER ;
+
+
+-- 15.- sp muestra combate de jugadores.
+DELIMITER //
+CREATE PROCEDURE `spJugadoresCombatido`(
+)
+begin
+	SELECT 
+		j.nombreJugador, 
+		c.nombreCampeon
+	FROM jugadores j
+    INNER JOIN batallas b
+    ON j.idJugador = b.jugadorId
+    INNER JOIN campeones c
+    ON b.campeonId = c.idCampeon;
+end //
+DELIMITER ;
+
+-- 16.-sp muestra numero de veces que combatió un jugador.
+DELIMITER //
+CREATE PROCEDURE `spJugadoresCombatido2`(
+)
+begin
+	SELECT 
+		j.nombreJugador, 
+		c.nombreCampeon
+	FROM jugadores j
+    INNER JOIN batallas b
+    ON j.idJugador = b.jugadorId
+    INNER JOIN campeones c
+    ON b.campeonId = c.idCampeon;
+end //
+DELIMITER ;
+
+
+--17.-sp muestra a los campeones que han sido contratados
+DELIMITER //
+CREATE PROCEDURE `spCampeonesContratados`()
+BEGIN
+SELECT c.nombrecampeon
+	FROM campeones c 
+	INNER JOIN batallas b
+	ON b.campeonId = c.idcampeon
+	WHERE b.cantidad >= 400;
+END //
+DELIMITER ;
+
+-- 18 sp muetra campeones menos contratados.
+DELIMITER //
+CREATE PROCEDURE `spMenosContratados`()
+BEGIN
+SELECT c.nombreCampeon
+    FROM campeones c 
+	INNER JOIN batallas b
+	ON c.idcampeon = b.campeonid
+	WHERE b.cantidad <= 400;              
+END //
+DELIMITER ;
+
+-- 19.- sp muestra jugadores mas han gastado en encontrar un campeon.
+DELIMITER //
+CREATE PROCEDURE 'spJugadoresMasGastado'()
+BEGIN
+SELECT j.nombrejugador
+    FROM jugadores j 
+	INNER JOIN batallas b
+	ON j.idJugador = b.jugadorid
+	WHERE b.cantidad = 800;              
+END //
+DELIMITER ;
+
+-- 20.- sp muestra jugadores que menos contratan campeones
+DELIMITER //
+CREATE PROCEDURE `spJuagadoresMenosContratan`()
+BEGIN
+SELECT j.nombreJugador
+    FROM jugadores j
+	INNER JOIN batallas b
+	ON j.idJugador = b.jugadorId
+	WHERE b.cantidad <= 400;              
+END //
+DELIMITER ;
+
+-- 21.- sp muestra jugadores más jovenes
+DELIMITER //
+CREATE PROCEDURE `spJugadoresJovenes` (
+
+)
+BEGIN
+ SELECT nombrejugador FROM jugadores where años<18;
+END//
+DELIMITER ;
+
+
+-- 22.-sp muestra jugadores adultos.
+DELIMITER //
+CREATE PROCEDURE `spJugadoresAdultos` (
+
+)
+BEGIN
+ SELECT nombrejugador FROM jugadores where años>=18;
+END//
+DELIMITER ;
+
+-- 23 .- sp muestra jugadores que no han combatido.
+DELIMITER //
+CREATE PROCEDURE `spJuagadoresNoCombatido`()
+BEGIN
+SELECT j.nombreJugador
+    FROM jugadores j
+	INNER JOIN batallas b
+	ON j.idJugador != b.jugadorId;             
+END //
+DELIMITER ;
+
+-- 24.- sp muestra campeones que juegan sin cobrar.
+DELIMITER //
+CREATE PROCEDURE `spCampeonesNoCobran`(
+)
+BEGIN 
+SELECT nombreCampeon from campeones where precio is null;
+END //
+DELIMITER ;
+
+--26.- sp muestra el total de pago de un jugador. 
+DELIMITER //
+CREATE FUNCTION `fnTotalPagoJugador` (_nombreJugador VARCHAR(45))
+	RETURNS DECIMAL(8,2)
+	
+    BEGIN
+		DECLARE totalPago DECIMAL(8,2);
+        SET totalPago = (SELECT 
+						 SUM(c.precio * b.cantidad)
+						 FROM jugadores j
+						 INNER JOIN batallas b
+						 ON j.idJugador = b.jugadorId
+						 INNER JOIN campeones c
+						 ON b.campeonId = c.idCampeon
+						 WHERE j.nombreJugador = _nombreJugador
+                         );
+        RETURN totalPago;
+    END //
+DELIMITER ;
+
+
+
+
+-- 27.- fn muestra el total de jugadores.
+
+DELIMITER //
+CREATE FUNCTION `fnTotalJugadores`()
+RETURNS INTEGER
+BEGIN
+	DECLARE total INTEGER;
+	SET total=(SELECT COUNT(nombreJugador) FROM jugadores);
+	RETURN total;
+END //
+DELIMITER ;
+
+-- 28 fn devuelve el total de campeones.
+DELIMITER //
+CREATE FUNCTION `fnTotalCampeones`()
+RETURNS INTEGER
+BEGIN
+	DECLARE total INTEGER;
+	SET total=(SELECT COUNT(nombrecampeon) FROM campeones);
+	RETURN total;
+END //
+DELIMITER ;
+
+-- 30.- fn muestra si un jugador es joven o adulto.
+DELIMITER //
+CREATE FUNCTION `fnAdultoOJovenJugador`(_idJugador INT)
+	RETURNS varchar(25)
+	BEGIN
+    declare _edad int;
+    declare mensaje varchar(20);
+	set _edad=(select años from jugadores 
+    where idJugador=_idJugador);
+    IF _edad <18 then
+		set mensaje="Joven";
+	else
+		set mensaje="Adulto";
+	end if;
+    return mensaje;
+	END //
+DELIMITER ;
+
+-- 31.- fn muestra si un campeon es joven o adulto.
+DELIMITER //
+CREATE FUNCTION `fnAdultoOJovenCampeon`(_idCampeon INT)
+	RETURNS varchar(25)
+	BEGIN
+    declare _edad int;
+    declare mensaje varchar(20);
+	set _edad=(select años from campeones
+    where idcampeon=_idCampeon);
+    IF _edad <18 then
+		set mensaje="Joven";
+	else
+		set mensaje="Adulto";
+	end if;
+    return mensaje;
+	END //
+DELIMITER ;
+
+-- 32.- fn retorna el numero de veces que un jugador ha contratado a un campeon especifico.
+DELIMITER //
+CREATE FUNCTION `fnTotalGCampeon_JugadorEspecifico`(_idJugador int,_idCampeon int)
+RETURNS decimal
+BEGIN
+DECLARE mensaje decimal(8,2);
+set mensaje=(
+	SELECT 
+	count(cantidad)
+	FROM jugadores j
+    INNER JOIN batallas b
+    ON j.idJugador = b.jugadorId
+    INNER JOIN campeones c
+    ON b.campeonId = c.idCampeon
+	WHERE c.idCampeon = _idCampeon and j.idJugador=_idJugador);
+    return mensaje;
+END //
+DELIMITER ;
+
+-- 33.-fn retorna el numero de veces que un jugador ha contratado a un campeon especifico.
+DELIMITER //
+CREATE FUNCTION `fnTotalCampeonJugadorEspecifico`(_idJugador int,_idCampeon int)
+RETURNS int
+BEGIN
+DECLARE mensaje varchar(10);
+set mensaje=(
+	SELECT 
+	count(idCampeon)
+	FROM jugadores j
+    INNER JOIN batallas b
+    ON j.idJugador = b.jugadorId
+    INNER JOIN campeones c
+    ON b.campeonId = c.idCampeon
+	WHERE c.idCampeon = _idCampeon and j.idJugador=_idJugador);
+    return mensaje;
+END //
+DELIMITER ;
+
+
+
+CALL spCrearRegistroJugador('Uriel',1,'2018/10/30',20);
+CALL spCrearRegistroJugador('Jose Benito',2,'2018/10/30',21);
+CALL spCrearRegistroJugador('Luis',3,'2018/10/30',20);
+CALL spCrearRegistroJugador('Pedro',4,'2018/10/30',20);
+
+CALL spCrearRegistroCampeon('Akali', 'Aseseino', 790, '2018-05-11',32);
+CALL spCrearRegistroCampeon('Brand', 'Aseseino', 500, '2018-09-10',21);
+CALL spCrearRegistroCampeon('Caitlyn', 'mago', 880, '2018-01-01',24);
+CALL spCrearRegistroCampeon('kein', 'dead', null, '2018-01-01',24);
+CALL spCrearRegistroCampeon('marcos', 'Forny', null, '2018-01-01',54);
+
+
+CALL spCrearRegistroBatallas(1,2,400);
+CALL spCrearRegistroBatallas(2,3,800);
+CALL spCrearRegistroBatallas(3,3,800);
+
+CALL spActualizaJugador('Eber',1,'2018/10/30',21,1);
+CALL spActualizaBatalla(1,2,150);
+CALL spActualizaCampeon('Usiel','Criminal',988,'2018-06-30',24,3);
+
+CALL spEliminaRegistroBatalla(1,3);
+CALL spEliminaRegistroJugador(1);
+CALL spEliminaRegistroCampeon(3);
+
+CALL spRegistrosJugadores();
+CALL spRegistroscampeones();
+CALL spRegistrosbatallas();
+
+
+CALL spjugadorEspecifico(2);
+CALL spCampeonEspecifico(3);
+
+
+CALL spJugadoresCombatido();
+CALL spJugadoresCombatido2();
+
+CALL spCampeonesNoCobran();
+CALL spCampeonesContratados();
+CALL spMenosContratados();
+
+CALL spJugadoresJovenes();
+CALL spJugadoresAdultos();
+
+
+SELECT fnTotalPagoJugador();
+SELECT fnTotalJugadores();
+SELECT fnTotalCampeones();
+SELECT fnAdultoOJovenJugador(1);
+SELECT fnAdultoOJovenCampeon(2);
+SELECT fnTotalGCampeon_JugadorEspecifico(2,3);
+SELECT fnTotalCampeonJugadorEspecifico(3,3);
